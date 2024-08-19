@@ -1,34 +1,76 @@
-import { useState } from "react";
-import Nav from "../Nav";
+import Nav from '../Nav'
+import {useState} from 'react'
+import {useCookies} from 'react-cookie'
+import {useNavigate} from 'react-router-dom'
+import axios from 'axios'
 
-const OnBoard = () => {
+const OnBoarding = () => {
+    const [cookies, setCookie, removeCookie] = useCookies(null)
     const [formData, setFormData] = useState({
-        user
+        user_id: cookies.UserId,
+        first_name: "",
+        dob_day: "",
+        dob_month: "",
+        dob_year: "",
+        show_gender: false,
+        gender_identity: "man",
+        gender_interest: "woman",
+        url: "",
+        about: "",
+        matches: []
+
     })
 
-    const handleSubmit = () => {
-        console.log("submitted");
-    };
-    const handleChange = () => {
-        console.log("change");
-    };
+    let navigate = useNavigate()
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        try {
+            const response = await axios.put('https://roomer-7d8a0.web.app/user', {formData})
+            const success = response.status === 200
+            if (success) navigate('/dashboard')
+        } catch (err) {
+            console.log(err)
+        }
+
+    }
+
+    const handleChange = (e) => {
+        console.log('e', e)
+        const value = e.target.type === "checkbox" ? e.target.checked : e.target.value
+        const name = e.target.name
+
+        setFormData((prevState) => ({
+            ...prevState,
+            [name]: value
+        }))
+    }
+
     return (
         <>
-            <Nav minimal={true} setShowModal={() => { }} showModal={false} />
+            <Nav
+                minimal={true}
+                setShowModal={() => {
+                }}
+                showModal={false}
+            />
+
             <div className="onboarding">
                 <h2>CREATE ACCOUNT</h2>
+
                 <form onSubmit={handleSubmit}>
                     <section>
                         <label htmlFor="first_name">First Name</label>
                         <input
                             id="first_name"
-                            type="text"
+                            type='text'
                             name="first_name"
                             placeholder="First Name"
                             required={true}
-                            value={""}
+                            value={formData.first_name}
                             onChange={handleChange}
                         />
+
                         <label>Birthday</label>
                         <div className="multiple-input-container">
                             <input
@@ -37,25 +79,27 @@ const OnBoard = () => {
                                 name="dob_day"
                                 placeholder="DD"
                                 required={true}
-                                value={""}
+                                value={formData.dob_day}
                                 onChange={handleChange}
                             />
+
                             <input
                                 id="dob_month"
                                 type="number"
                                 name="dob_month"
                                 placeholder="MM"
                                 required={true}
-                                value={""}
+                                value={formData.dob_month}
                                 onChange={handleChange}
                             />
+
                             <input
                                 id="dob_year"
                                 type="number"
                                 name="dob_year"
                                 placeholder="YYYY"
                                 required={true}
-                                value={""}
+                                value={formData.dob_year}
                                 onChange={handleChange}
                             />
                         </div>
@@ -66,42 +110,43 @@ const OnBoard = () => {
                                 id="man-gender-identity"
                                 type="radio"
                                 name="gender_identity"
-                                required={true}
                                 value="man"
                                 onChange={handleChange}
-                                checked={false}
+                                checked={formData.gender_identity === "man"}
                             />
                             <label htmlFor="man-gender-identity">Man</label>
                             <input
                                 id="woman-gender-identity"
                                 type="radio"
                                 name="gender_identity"
-                                required={true}
                                 value="woman"
                                 onChange={handleChange}
-                                checked={false}
+                                checked={formData.gender_identity === "woman"}
                             />
                             <label htmlFor="woman-gender-identity">Woman</label>
                             <input
                                 id="more-gender-identity"
                                 type="radio"
                                 name="gender_identity"
-                                required={true}
                                 value="more"
                                 onChange={handleChange}
-                                checked={false}
+                                checked={formData.gender_identity === "more"}
                             />
                             <label htmlFor="more-gender-identity">More</label>
                         </div>
-                        <label htmlFor="show-gender">Show gender on my profile</label>
+
+                        <label htmlFor="show-gender">Show Gender on my Profile</label>
+
                         <input
                             id="show-gender"
                             type="checkbox"
                             name="show_gender"
                             onChange={handleChange}
-                            checked={false}
+                            checked={formData.show_gender}
                         />
+
                         <label>Show Me</label>
+
                         <div className="multiple-input-container">
                             <input
                                 id="man-gender-interest"
@@ -109,16 +154,16 @@ const OnBoard = () => {
                                 name="gender_interest"
                                 value="man"
                                 onChange={handleChange}
-                                checked={false}
+                                checked={formData.gender_interest === "man"}
                             />
                             <label htmlFor="man-gender-interest">Man</label>
                             <input
-                                id="wpman-gender-interest"
+                                id="woman-gender-interest"
                                 type="radio"
                                 name="gender_interest"
                                 value="woman"
                                 onChange={handleChange}
-                                checked={false}
+                                checked={formData.gender_interest === "woman"}
                             />
                             <label htmlFor="woman-gender-interest">Woman</label>
                             <input
@@ -127,25 +172,29 @@ const OnBoard = () => {
                                 name="gender_interest"
                                 value="everyone"
                                 onChange={handleChange}
-                                checked={false}
+                                checked={formData.gender_interest === "everyone"}
                             />
-                            <label htmlFor="more-gender-interest">Everyone</label>
+                            <label htmlFor="everyone-gender-interest">Everyone</label>
+
                         </div>
-                        <label htmlFor="about">About Me</label>
+
+                        <label htmlFor="about">About me</label>
                         <input
                             id="about"
                             type="text"
                             name="about"
                             required={true}
                             placeholder="I like long walks..."
-                            value={""}
+                            value={formData.about}
                             onChange={handleChange}
                         />
-                        <input type="submit" />
+
+                        <input type="submit"/>
                     </section>
 
                     <section>
-                        <label htmlFor="about">Profile Picture</label>
+
+                        <label htmlFor="url">Profile Photo</label>
                         <input
                             type="url"
                             name="url"
@@ -153,12 +202,16 @@ const OnBoard = () => {
                             onChange={handleChange}
                             required={true}
                         />
-                        <div className="photo-container"></div>
+                        <div className="photo-container">
+                            {formData.url && <img src={formData.url} alt="profile pic preview"/>}
+                        </div>
+
+
                     </section>
+
                 </form>
             </div>
         </>
-    );
-};
-
-export default OnBoard;
+    )
+}
+export default OnBoarding
